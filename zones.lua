@@ -170,7 +170,7 @@ local velius = {
 }
 
 local div = {
-  cshome="Sunset Home",
+  cshome="CS Home",
   neighborhood = "Sunrise Hills",
 }
 

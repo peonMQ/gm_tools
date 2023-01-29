@@ -6,10 +6,10 @@ local imgui = require 'ImGui'
 
 local uihelpers = require('uihelpers')
 
-local selectedCorpse = {key = 0, value = ""}
+local selectedCorpse = nil
 
 local function resetState()
-  selectedCorpse = {key = 0, value = ""}
+  selectedCorpse = nil
 end
 
 ---@param corpses spawn[]
@@ -22,19 +22,10 @@ local function renderZoneSelector(corpses, okText, selectedCorpseAction)
 
   if imgui.BeginPopupModal("Summon Corpse", nil, ImGuiWindowFlags.AlwaysAutoResize) then
     imgui.Text("Select a corpse to summon:")
-
-    local combospawns = {}
-    for index, corpse in ipairs(corpses) do
-      combospawns[index] = corpse.Name()
-    end
-
-    selectedCorpse = uihelpers.DrawComboBox2("Corpse", selectedCorpse, combospawns, false)
-
-
-    local corpse = corpses[selectedCorpse.key]
-    ImGui.BeginDisabled(not corpse or not corpse())
+    selectedCorpse = uihelpers.DrawComboBox3("Corpse", selectedCorpse, corpses, function(spawn) if spawn then return spawn.Name() else return "" end end)
+    ImGui.BeginDisabled(not selectedCorpse or not selectedCorpse())
     if imgui.Button("Target Corpse") then
-      mq.cmdf("/mqtarget id %d", corpse.ID())
+      mq.cmdf("/mqtarget id %d", selectedCorpse.ID())
     end
     ImGui.EndDisabled()
 
