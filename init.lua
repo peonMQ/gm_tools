@@ -17,7 +17,6 @@ if not bci then
   return
 end
 
-local zones = require('zones')
 local zoneselector = require('zoneselector')
 local corpseselector = require('corpseselector')
 local zoneinstanceselector = require('zoneinstanceselector')
@@ -148,7 +147,11 @@ local corpse = {
   isDisabled = function (state) return not mq.TLO.Me.GM() end,
   activate = function(state)
     playerCorpses = mq.getFilteredSpawns(function(spawn) return spawn.Type() == "Corpse" and spawn.Deity.ID() > 0 end)
-    state.corpse.active = true
+    if next(playerCorpses) then
+      state.corpse.active = true
+    else
+      logger.Warn("No player corpses found in zone.")
+    end
   end,
   deactivate = function(state)
     playerCorpses = {}
@@ -427,11 +430,11 @@ local function actionbarUI()
 
   ImGui.End()
   if uiState.zone.active then
-    zoneselector(zones, "Zone", zoneTo)
+    zoneselector("Zone", zoneTo)
   end
 
   if uiState.zoneshutdown.active then
-    zoneselector(zones, "Zone Shutdown", zoneShutdown)
+    zoneselector("Zone Shutdown", zoneShutdown)
   end
 
   if uiState.zoneinstance.active then
