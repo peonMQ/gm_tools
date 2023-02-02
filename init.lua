@@ -3,6 +3,8 @@ require 'ImGui'
 
 --- @type Mq
 local mq = require 'mq'
+
+---@type Icons
 local icons = require 'mq/icons'
 local logger = require 'utils/logging'
 local debugUtils = require 'utils/debug'
@@ -18,6 +20,7 @@ end
 local zones = require('zones')
 local zoneselector = require('zoneselector')
 local corpseselector = require('corpseselector')
+local zoneinstanceselector = require('zoneinstanceselector')
 
 
 -- local classes
@@ -35,15 +38,16 @@ local corpseselector = require('corpseselector')
 ---@field public buffs ActionButton
 ---@field public cazictouch ActionButton
 ---@field public corpse ActionButton
----@field public goto ActionButton
+---@field public godmode ActionButton
 ---@field public heal ActionButton
+---@field public kick ActionButton
 ---@field public kill ActionButton
 ---@field public ressurect ActionButton
 ---@field public rq ActionButton
+---@field public summon ActionButton
 ---@field public zone ActionButton
+---@field public zoneinstance ActionButton
 ---@field public zoneshutdown ActionButton
-
-
 
 -- GUI Control variables
 local openGUI = true
@@ -126,6 +130,17 @@ local buffs = {
 }
 
 ---@type ActionButton
+local cazictouch = {
+  active = false,
+  icon = icons.FA_MAGIC, -- MD_ANDRIOD
+  tooltip = "Cazic Touch target",
+  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() end,
+  activate = function(state)
+    doGMCommand("#castspell 7477")
+  end
+}
+
+---@type ActionButton
 local corpse = {
   active = false,
   icon = icons.MD_AIRLINE_SEAT_FLAT, -- MD_ANDRIOD
@@ -138,6 +153,24 @@ local corpse = {
   deactivate = function(state)
     playerCorpses = {}
     state.corpse.active = false
+  end,
+}
+
+---@type ActionButton
+local godmode = {
+  active = false,
+  icon = icons.MD_ANDROID,
+  tooltip = "God mode",
+  isDisabled = function (state)
+    return not mq.TLO.Me.GM()
+  end,
+  activate = function(state)
+    state.godmode.active = true
+    doGMCommand("#godmode on")
+  end,
+  deactivate = function(state)
+    state.godmode.active = false
+    doGMCommand("#godmode off")
   end,
 }
 ---@type ActionButton
@@ -162,17 +195,6 @@ local kick = {
   isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() end,
   activate = function(state)
     doGMCommand("#kick")
-  end
-}
-
----@type ActionButton
-local cazictouch = {
-  active = false,
-  icon = icons.FA_MAGIC, -- MD_ANDRIOD
-  tooltip = "Cazic Touch target",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() end,
-  activate = function(state)
-    doGMCommand("#castspell 7477")
   end
 }
 
@@ -222,7 +244,6 @@ local summon = {
   end
 }
 
-
 ---@type ActionButton
 local togglezone = {
   active = false,
@@ -237,6 +258,19 @@ local togglezone = {
   end,
 }
 
+---@type ActionButton
+local zoneinstance = {
+  active = false,
+  icon = icons.FA_PAPER_PLANE,
+  tooltip = "Zone Instance",
+  isDisabled = function (state) return not mq.TLO.Me.GM() end,
+  activate = function(state)
+    state.zoneinstance.active = true
+  end,
+  deactivate = function(state)
+    state.zoneinstance.active = false
+  end,
+}
 
 ---@type ActionButton
 local zoneshutdown = {
@@ -255,15 +289,17 @@ local zoneshutdown = {
 ---@type ActionButtons
 local uiState = {
   buffs = buffs,
-  corpse = corpse,
-  heal = heal,
-  ressurect = ressurect,
-  kick = kick,
   cazictouch = cazictouch,
+  corpse = corpse,
+  godmode = godmode,
+  heal = heal,
+  kick = kick,
   kill = kill,
+  ressurect = ressurect,
   rq = rq,
   summon = summon,
   zone = togglezone,
+  zoneinstance = zoneinstance,
   zoneshutdown = zoneshutdown,
 }
 
@@ -367,6 +403,8 @@ end
 local function actionbarUI()
   openGUI = ImGui.Begin('Actions', openGUI, windowFlags)
 
+  createStateButton(uiState.godmode)
+  ImGui.SameLine()
   createButton(uiState.rq, yellowButton)
   ImGui.SameLine()
   createButton(uiState.buffs, blueButton)
@@ -394,6 +432,10 @@ local function actionbarUI()
 
   if uiState.zoneshutdown.active then
     zoneselector(zones, "Zone Shutdown", zoneShutdown)
+  end
+
+  if uiState.zoneinstance.active then
+    zoneinstanceselector("Zone to Instance", function(selectedInstanceId) uiState.zoneinstance.deactivate(uiState); doGMCommand("#zoneinstance "..selectedInstanceId) end)
   end
 
   if next(playerCorpses) then
