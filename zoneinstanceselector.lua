@@ -16,7 +16,7 @@ end
 ---@param selectedInstanceIdAction fun(selectedInstanceId: number)
 local function renderZoneSelector(okText, selectedInstanceIdAction)
   if not imgui.IsPopupOpen("Zone Instance") then
-    imgui.OpenPopup("Summon Corpse")
+    imgui.OpenPopup("Zone Instance")
   end
 
   if imgui.BeginPopupModal("Zone Instance", nil, ImGuiWindowFlags.AlwaysAutoResize) then
