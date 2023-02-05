@@ -1,15 +1,15 @@
 --- @type ImGui
-require 'ImGui'
+local imgui = require 'ImGui'
 local debugUtils = require 'utils/debug'
 
 local function renderHelpMarker(desc)
-    ImGui.TextDisabled('(?)')
-    if ImGui.IsItemHovered() then
-        ImGui.BeginTooltip()
-        ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35.0)
-        ImGui.Text(desc)
-        ImGui.PopTextWrapPos()
-        ImGui.EndTooltip()
+    imgui.TextDisabled('(?)')
+    if imgui.IsItemHovered() then
+        imgui.BeginTooltip()
+        imgui.PushTextWrapPos(imgui.GetFontSize() * 35.0)
+        imgui.Text(desc)
+        imgui.PopTextWrapPos()
+        imgui.EndTooltip()
     end
 end
 
@@ -22,24 +22,24 @@ end
 ---@param helpText string?
 ---@return T
 local function renderComboBox(label, resultvar, options, byKey, helpText)
-    ImGui.Text(label)
-    ImGui.SameLine()
-    if ImGui.BeginCombo("##"..label, resultvar) then
+    imgui.Text(label)
+    imgui.SameLine()
+    if imgui.BeginCombo("##"..label, resultvar) then
         for i,j in pairs(options) do
             if byKey then
-                if ImGui.Selectable(i, i == resultvar) then
+                if imgui.Selectable(i, i == resultvar) then
                     resultvar = ""..i
                 end
             else
-                if ImGui.Selectable(j, i == resultvar) then
+                if imgui.Selectable(j, i == resultvar) then
                     resultvar = ""..i
                 end
             end
         end
-        ImGui.EndCombo()
+        imgui.EndCombo()
     end
     if helpText then
-        ImGui.SameLine()
+        imgui.SameLine()
         renderHelpMarker(helpText)
     end
     return resultvar
@@ -52,19 +52,19 @@ end
 ---@param helpText string?
 ---@return T
 local function renderComboBox2(label, selectedValue, options, helpText)
-    ImGui.Text(label)
-    ImGui.SameLine()
+    imgui.Text(label)
+    imgui.SameLine()
     local selectedText = selectedValue.value
-    if ImGui.BeginCombo("##"..label, selectedText) then
+    if imgui.BeginCombo("##"..label, selectedText) then
         for i,j in pairs(options) do
-            if ImGui.Selectable(j, j == selectedText) then
+            if imgui.Selectable(j, j == selectedText) then
                 selectedValue = {key = i, value = j}
             end
         end
-        ImGui.EndCombo()
+        imgui.EndCombo()
     end
     if helpText then
-        ImGui.SameLine()
+        imgui.SameLine()
         renderHelpMarker(helpText)
     end
     return selectedValue
@@ -78,20 +78,21 @@ end
 ---@param helpText string?
 ---@return T
 local function renderComboBox3(label, selectedValue, options, displayText, helpText)
-    ImGui.Text(label)
-    ImGui.SameLine()
+    imgui.Text(label)
+    imgui.SameLine()
     local selectedText = displayText(selectedValue)
-    if ImGui.BeginCombo("##"..label, selectedText) then
+    if imgui.BeginCombo("##"..label, selectedText, 0) then
         for _,j in ipairs(options) do
             local valueText = displayText(j)
-            if ImGui.Selectable(valueText, valueText == selectedText) then
+            if imgui.Selectable(valueText, valueText == selectedText) then
+                selectedText = displayText(j)
                 selectedValue = j
             end
         end
-        ImGui.EndCombo()
+        imgui.EndCombo()
     end
     if helpText then
-        ImGui.SameLine()
+        imgui.SameLine()
         renderHelpMarker(helpText)
     end
     return selectedValue
