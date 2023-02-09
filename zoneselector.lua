@@ -4,7 +4,7 @@ local imgui = require 'ImGui'
 local uihelpers = require('uihelpers')
 local worldZones = require('zones')
 
----@type {name:string, zones:{name: string, shortname: string}[]}[]
+---@type Continent[]
 local continents = {}
 for continent,continentZones in pairs(worldZones) do
   local cz = {}
@@ -26,13 +26,14 @@ table.sort(continents, function(a,b)
 end)
 
 
-
+---@type Continent | nil
 local selectedContinent = nil
+---@type Zone | nil
 local selectedZone = nil
 
 local function resetState()
-  selectedContinent = nil
-  selectedZone = nil
+  selectedContinent = nil --[[@as Continent]]
+  selectedZone = nil --[[@as Zone]]
 end
 
 local function convertContient(continent)
@@ -67,7 +68,7 @@ local function renderZoneSelector(okText, selectedZoneAction)
     end
 
     ImGui.BeginDisabled(not selectedZone)
-    if imgui.Button(okText) then
+    if imgui.Button(okText) and selectedZone then
       local zoneShortName = selectedZone.shortname
       resetState()
       imgui.CloseCurrentPopup()

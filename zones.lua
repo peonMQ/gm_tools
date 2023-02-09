@@ -1,4 +1,12 @@
----@alias Contients "Anatonica" | "Kunark" | "Velious" | "Planes"
+---@alias Continents "Anatonica" | "Kunark" | "Velious" | "Planes"
+
+---@class Zone
+---@field name string
+---@field shortname string
+
+---@class Continent
+---@field name Continents
+---@field zones Zone[]
 
 local original = {
   -- apprentice="Designer Apprentice",
@@ -174,7 +182,7 @@ local div = {
   neighborhood = "Sunrise Hills",
 }
 
----@type table<Contients, table<string, string>>
+---@type table<Continents, table<string, string>>
 return {
   Anatonica = anatonica,
   Faydwer = faydwer,
