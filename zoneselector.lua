@@ -1,4 +1,3 @@
---- @type ImGui
 local imgui = require 'ImGui'
 
 local uihelpers = require('uihelpers')
@@ -67,14 +66,14 @@ local function renderZoneSelector(okText, selectedZoneAction)
       selectedZone = uihelpers.DrawComboBox3("Zone", selectedZone, selectedContinent.zones, convertZone)
     end
 
-    ImGui.BeginDisabled(not selectedZone)
+    imgui.BeginDisabled(not selectedZone)
     if imgui.Button(okText) and selectedZone then
       local zoneShortName = selectedZone.shortname
       resetState()
       imgui.CloseCurrentPopup()
       selectedZoneAction(zoneShortName);
     end
-    ImGui.EndDisabled()
+    imgui.EndDisabled()
 
     imgui.SameLine()
 

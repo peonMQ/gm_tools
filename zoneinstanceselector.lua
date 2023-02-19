@@ -1,7 +1,4 @@
---- @type Mq
 local mq = require 'mq'
-
---- @type ImGui
 local imgui = require 'ImGui'
 
 local uihelpers = require('uihelpers')
@@ -22,15 +19,15 @@ local function renderZoneSelector(okText, selectedInstanceIdAction)
   if imgui.BeginPopupModal("Zone Instance", nil, ImGuiWindowFlags.AlwaysAutoResize) then
 
 
-    ImGui.Text("Instance Id")
-    selectedInstanceId, _ = ImGui.InputTextWithHint("##instanceid", "id", selectedInstanceId)
+    imgui.Text("Instance Id")
+    selectedInstanceId, _ = imgui.InputTextWithHint("##instanceid", "id", selectedInstanceId)
 
     local instanceId = tonumber(selectedInstanceId)
-    ImGui.BeginDisabled(not selectedInstanceId or not instanceId)
+    imgui.BeginDisabled(not selectedInstanceId or not instanceId)
     if imgui.Button(okText) and instanceId then
       selectedInstanceIdAction(instanceId)
     end
-    ImGui.EndDisabled()
+    imgui.EndDisabled()
 
     imgui.SameLine()
 
