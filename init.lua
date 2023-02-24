@@ -1,7 +1,5 @@
 local imgui = require 'ImGui'
 local mq = require 'mq'
-
----@type Icons
 local icons = require 'mq/icons'
 local logger = require 'utils/logging'
 local debugUtils = require 'utils/debug'
@@ -130,7 +128,7 @@ local cazictouch = {
   active = false,
   icon = icons.FA_MAGIC, -- MD_ANDRIOD
   tooltip = "Cazic Touch target",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() end,
+  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() or mq.TLO.Target.ID() == mq.TLO.Me.ID() end,
   activate = function(state)
     doGMCommand("#castspell 7477")
   end
@@ -192,7 +190,7 @@ local kick = {
   active = false,
   icon = icons.FA_MINUS_SQUARE, -- MD_ANDRIOD
   tooltip = "Kick target",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() end,
+  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() or mq.TLO.Target.ID() == mq.TLO.Me.ID() end,
   activate = function(state)
     doGMCommand("#kick")
   end
@@ -203,7 +201,7 @@ local kill = {
   active = false,
   icon = icons.FA_MINUS_CIRCLE, -- MD_ANDRIOD
   tooltip = "Kill target",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() end,
+  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() or mq.TLO.Target.ID() == mq.TLO.Me.ID() end,
   activate = function(state)
     doGMCommand("#kill")
   end
