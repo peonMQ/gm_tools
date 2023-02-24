@@ -321,7 +321,7 @@ local function zoneShutdown(zoneShortName)
   elseif zoneShortName == mq.TLO.Zone.ShortName() then
     logger.Error("Teleport to a different zone before trying to shutdown <%s>", zoneShortName)
   else
-    doGMCommand(string.format("#zone %s", zoneShortName))
+    doGMCommand(string.format("#zoneshutdown %s", zoneShortName))
   end
 end
 
