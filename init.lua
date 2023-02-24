@@ -206,6 +206,20 @@ local kill = {
     doGMCommand("#kill")
   end
 }
+
+---@type ActionButton
+local reloadrules = {
+  active = false,
+  icon = icons.MD_REFRESH,
+  tooltip = "Reload Rules",
+  isDisabled = function (state)
+    return not mq.TLO.Me.GM()
+  end,
+  activate = function(state)
+    doGMCommand("#reloadrules")
+  end
+}
+
 ---@type ActionButton
 local ressurect = {
   active = false,
@@ -293,6 +307,7 @@ local uiState = {
   heal = heal,
   kick = kick,
   kill = kill,
+  reloadrules = reloadrules,
   ressurect = ressurect,
   rq = rq,
   summon = summon,
@@ -420,6 +435,8 @@ local function actionbarUI()
   createButton(uiState.kick, orangeButton)
   imgui.SameLine()
   createStateButton(uiState.zone)
+  imgui.SameLine()
+  createButton(uiState.reloadrules, fuchsiaButton)
   imgui.SameLine()
   createStateButton(uiState.zoneshutdown)
 
