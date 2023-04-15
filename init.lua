@@ -340,14 +340,12 @@ local function zoneShutdown(zoneShortName)
   end
 end
 
----@param corpseSpawn spawn
-local function summonCorpse(corpseSpawn)
+---@param doSummon boolean
+local function onCloseCorpsePopup(doSummon)
   uiState.corpse.deactivate(uiState)
-  if not corpseSpawn or not corpseSpawn() then
-    return
+  if doSummon then
+    doGMCommand("#summon")
   end
-
-  doGMCommand("#summon")
 end
 
 local function DrawTooltip(text)
@@ -454,7 +452,7 @@ local function actionbarUI()
   end
 
   if next(playerCorpses) then
-    corpseselector(playerCorpses, "Summon Corpse", summonCorpse)
+    corpseselector(playerCorpses, "Summon Corpse", onCloseCorpsePopup)
   end
 
   if not openGUI then

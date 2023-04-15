@@ -10,8 +10,8 @@ end
 
 ---@param corpses spawn[]
 ---@param okText string
----@param selectedCorpseAction fun(zoneShortName?: spawn)
-local function renderZoneSelector(corpses, okText, selectedCorpseAction)
+---@param summonTarget fun(doSummon?: boolean)
+local function renderZoneSelector(corpses, okText, summonTarget)
   if not imgui.IsPopupOpen("Summon Corpse") then
     imgui.OpenPopup("Summon Corpse")
   end
@@ -28,12 +28,12 @@ local function renderZoneSelector(corpses, okText, selectedCorpseAction)
     imgui.SameLine()
 
     local target = mq.TLO.Target
-    imgui.BeginDisabled(not target() or target.Type() ~= "Corpse")
+    local isDisabled = not selectedCorpse or not target() or target.ID() ~= selectedCorpse.ID()
+    imgui.BeginDisabled(isDisabled)
     if imgui.Button(okText) then
-      local corpse = corpses[selectedCorpse.key]
       resetState()
       imgui.CloseCurrentPopup()
-      selectedCorpseAction(corpse);
+      summonTarget(true)
     end
     imgui.EndDisabled()
 
@@ -42,7 +42,7 @@ local function renderZoneSelector(corpses, okText, selectedCorpseAction)
     if imgui.Button("Cancel") then
       resetState()
       imgui.CloseCurrentPopup()
-      selectedCorpseAction();
+      summonTarget();
     end
 
     imgui.EndPopup()
