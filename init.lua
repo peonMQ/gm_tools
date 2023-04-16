@@ -139,17 +139,11 @@ local corpse = {
   active = false,
   icon = icons.MD_AIRLINE_SEAT_FLAT, -- MD_ANDRIOD
   tooltip = "Corpse",
-  isDisabled = function (state) return not mq.TLO.Me.GM() end,
+  isDisabled = function (state) return not mq.TLO.Me.GM() or not next(playerCorpses) end,
   activate = function(state)
-    playerCorpses = mq.getFilteredSpawns(function(spawn) return spawn.Type() == "Corpse" and spawn.Deity.ID() > 0 end)
-    if next(playerCorpses) then
-      state.corpse.active = true
-    else
-      logger.Warn("No player corpses found in zone.")
-    end
+    state.corpse.active = true
   end,
   deactivate = function(state)
-    playerCorpses = {}
     state.corpse.active = false
   end,
 }
@@ -451,7 +445,7 @@ local function actionbarUI()
     zoneinstanceselector("Zone to Instance", function(selectedInstanceId) uiState.zoneinstance.deactivate(uiState); doGMCommand("#zoneinstance "..selectedInstanceId) end)
   end
 
-  if next(playerCorpses) then
+  if uiState.corpse.active then
     corpseselector(playerCorpses, "Summon Corpse", onCloseCorpsePopup)
   end
 
@@ -464,4 +458,5 @@ mq.imgui.init('ActionBar', actionbarUI)
 
 while not terminate do
   mq.delay(500)
+  playerCorpses = mq.getFilteredSpawns(function(spawn) return spawn.Type() == "Corpse" and spawn.Deity.ID() > 0 end)
 end
