@@ -21,16 +21,13 @@ Start the application by running the following command in-game (using the folder
 
 ### Logging
 User/character configs are located at `{MQConfigDir}\{ServerName}\{CharacterName}.json`
-Each list is one group, which gets sorted in HUD and spaced out.
+
+Valid log levels: `trace | debug | info | warn | error | fatal | help`
 Default log level: `warn`
 ```json
 {
-  "grouplayout": [
-    ["Eredhrin", "Hamfast", "Newt", "Bill", "Marillion", "Ithildin"]
-    ,["Renaissance", "Magica", "Tedd", "Araushnee", "Freyja", "Milamber"]
-    ,["Soundgarden", "Lolth", "Ronin", "Tyrion", "Sheperd", "Valsharess"]
-    ,["Genesis", "Vierna", "Osiris", "Eilistraee", "Regis", "Aredhel"]
-    ,["Mizzfit", "Komodo", "Izzy", "Lulz", "Tiamat", "Nozdormu"]
-  ]
+	"logging": {
+		"loglevel": "debug" 
+	}
 }
 ```
