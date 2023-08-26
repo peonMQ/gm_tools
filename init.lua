@@ -15,6 +15,7 @@ end
 local zoneselector = require('zoneselector')
 local corpseselector = require('corpseselector')
 local zoneinstanceselector = require('zoneinstanceselector')
+local illusionselector = require('illusionselector')
 
 
 -- local classes
@@ -30,6 +31,7 @@ local zoneinstanceselector = require('zoneinstanceselector')
 
 ---@class ActionButtons
 ---@field public buffs ActionButton
+---@field public petWeapons ActionButton
 ---@field public cazictouch ActionButton
 ---@field public corpse ActionButton
 ---@field public godmode ActionButton
@@ -39,6 +41,7 @@ local zoneinstanceselector = require('zoneinstanceselector')
 ---@field public ressurect ActionButton
 ---@field public rq ActionButton
 ---@field public summon ActionButton
+---@field public illusion ActionButton
 ---@field public zone ActionButton
 ---@field public zoneinstance ActionButton
 ---@field public zoneshutdown ActionButton
@@ -108,7 +111,7 @@ local buffs = {
   active = false,
   icon = icons.FA_MAGIC, -- MD_ANDRIOD
   tooltip = "Buff target",
-  isDisabled = function (state) return not mq.TLO.Target() end,
+  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() or mq.TLO.Target.ID() == mq.TLO.Me.ID() or mq.TLO.Target.GM() end,
   activate = function(state)
     doGMCommand("#castspell 2680")
     doGMCommand("#castspell 2681")
@@ -120,6 +123,20 @@ local buffs = {
     doGMCommand("#castspell 2696")
     doGMCommand("#castspell 3023")
     doGMCommand("#castspell 3028")
+  end
+}
+
+---@type ActionButton
+local petWeapons = {
+  active = false,
+  icon = icons.FA_SHIELD,
+  tooltip = "Pet Weapons",
+  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() or mq.TLO.Target.ID() == mq.TLO.Me.ID() or mq.TLO.Target.GM() end,
+  activate = function(state)
+    doGMCommand("#giveitem 28595")
+    doGMCommand("#giveitem 28595")
+    doGMCommand("#giveitem 28595")
+    doGMCommand("#giveitem 28595")
   end
 }
 
@@ -265,6 +282,20 @@ local togglezone = {
 }
 
 ---@type ActionButton
+local illusion = {
+  active = false,
+  icon = icons.FA_MAGIC,
+  tooltip = "Illusion",
+  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() end,
+  activate = function(state)
+    state.illusion.active = true
+  end,
+  deactivate = function(state)
+    state.illusion.active = false
+  end,
+}
+
+---@type ActionButton
 local zoneinstance = {
   active = false,
   icon = icons.FA_PAPER_PLANE,
@@ -295,6 +326,7 @@ local zoneshutdown = {
 ---@type ActionButtons
 local uiState = {
   buffs = buffs,
+  petWeapons = petWeapons,
   cazictouch = cazictouch,
   corpse = corpse,
   godmode = godmode,
@@ -305,6 +337,7 @@ local uiState = {
   ressurect = ressurect,
   rq = rq,
   summon = summon,
+  illusion = illusion,
   zone = togglezone,
   zoneinstance = zoneinstance,
   zoneshutdown = zoneshutdown,
@@ -318,6 +351,15 @@ local function zoneTo(zoneShortName)
     logger.Error("Zone shortname does not exist <%s>", zoneShortName)
   else
     doGMCommand(string.format("#zone %s", zoneShortName))
+  end
+end
+
+local function massIllusion(spellId)
+  uiState.illusion.deactivate(uiState)
+  if not spellId then
+    return
+  else
+    doGMCommand(string.format("#castspell %s", spellId))
   end
 end
 
@@ -414,11 +456,15 @@ local function actionbarUI()
   imgui.SameLine()
   createButton(uiState.buffs, blueButton)
   imgui.SameLine()
+  createButton(uiState.petWeapons, blueButton)
+  imgui.SameLine()
   createButton(uiState.corpse, blueButton)
   imgui.SameLine()
   createButton(uiState.heal, greenButton)
   imgui.SameLine()
   createButton(uiState.ressurect, fuchsiaButton)
+  imgui.SameLine()
+  createButton(uiState.illusion, fuchsiaButton)
   imgui.SameLine()
   createButton(uiState.kill, redButton)
   imgui.SameLine()
@@ -447,6 +493,10 @@ local function actionbarUI()
 
   if uiState.corpse.active then
     corpseselector(playerCorpses, "Summon Corpse", onCloseCorpsePopup)
+  end
+
+  if uiState.illusion.active then
+    illusionselector("Mass Illusion", massIllusion)
   end
 
   if not openGUI then
