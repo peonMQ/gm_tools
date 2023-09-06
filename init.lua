@@ -113,10 +113,10 @@ local buffs = {
   tooltip = "Buff target",
   isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() or mq.TLO.Target.ID() == mq.TLO.Me.ID() or mq.TLO.Target.GM() end,
   activate = function(state)
-    doGMCommand("#castspell 2680")
+    -- doGMCommand("#castspell 2680") -- overwritten by Beta Brell's Stalwart : 3028
     doGMCommand("#castspell 2681")
     doGMCommand("#castspell 2682")
-    doGMCommand("#castspell 2691")
+    -- doGMCommand("#castspell 2691") -- overwritten by Beta Boar : 3023
     doGMCommand("#castspell 2692")
     doGMCommand("#castspell 2693")
     doGMCommand("#castspell 2695")
@@ -193,6 +193,7 @@ local heal = {
   end,
   activate = function(state)
     doGMCommand("#heal")
+    doGMCommand("#mana")
   end
 }
 
@@ -379,6 +380,7 @@ end
 ---@param doSummon boolean
 local function onCloseCorpsePopup(doSummon)
   uiState.corpse.deactivate(uiState)
+  logger.Warn("onCloseCorpsePopup <%s>", doSummon)
   if doSummon then
     doGMCommand("#summon")
   end
