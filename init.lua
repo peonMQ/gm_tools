@@ -121,6 +121,7 @@ local buffs = {
     doGMCommand("#castspell 2693")
     doGMCommand("#castspell 2695")
     doGMCommand("#castspell 2696")
+    doGMCommand("#castspell 2699")
     doGMCommand("#castspell 3023")
     doGMCommand("#castspell 3028")
   end
@@ -233,6 +234,19 @@ local reloadrules = {
 }
 
 ---@type ActionButton
+local repop = {
+  active = false,
+  icon = icons.MD_REFRESH,
+  tooltip = "Repop Zone",
+  isDisabled = function (state)
+    return not mq.TLO.Me.GM()
+  end,
+  activate = function(state)
+    doGMCommand("#repop")
+  end
+}
+
+---@type ActionButton
 local ressurect = {
   active = false,
   icon = icons.MD_HEALING, -- MD_ANDRIOD
@@ -335,6 +349,7 @@ local uiState = {
   kick = kick,
   kill = kill,
   reloadrules = reloadrules,
+  repop = repop,
   ressurect = ressurect,
   rq = rq,
   summon = summon,
@@ -477,6 +492,8 @@ local function actionbarUI()
   createStateButton(uiState.zone)
   imgui.SameLine()
   createButton(uiState.reloadrules, fuchsiaButton)
+  imgui.SameLine()
+  createButton(uiState.repop, orangeButton)
   imgui.SameLine()
   createStateButton(uiState.zoneshutdown)
 
