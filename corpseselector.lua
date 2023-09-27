@@ -8,6 +8,10 @@ local function resetState()
   selectedCorpse = nil
 end
 
+local function doGMCommand(command)
+  mq.cmdf("/say %s", command)
+end
+
 ---@param corpses spawn[]
 ---@param okText string
 ---@param summonTarget fun(doSummon?: boolean)
@@ -24,11 +28,17 @@ local function renderZoneSelector(corpses, okText, summonTarget)
       mq.cmdf("/mqtarget id %d", selectedCorpse.ID())
     end
     imgui.EndDisabled()
-
     imgui.SameLine()
 
     local target = mq.TLO.Target
     local isDisabled = not selectedCorpse or not target() or target.ID() ~= selectedCorpse.ID()
+    imgui.BeginDisabled(isDisabled)
+    if imgui.Button("Ressurect") then
+      doGMCommand("#castspell 994")
+    end
+    imgui.EndDisabled()
+    imgui.SameLine()
+
     imgui.BeginDisabled(isDisabled)
     if imgui.Button(okText) then
       resetState()
@@ -36,7 +46,6 @@ local function renderZoneSelector(corpses, okText, summonTarget)
       summonTarget(true)
     end
     imgui.EndDisabled()
-
     imgui.SameLine()
 
     if imgui.Button("Cancel") then

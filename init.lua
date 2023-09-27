@@ -101,7 +101,6 @@ local fuchsiaButton = {
   active = create(6.4, 0.8, 0.8),
 }
 
-
 local function doGMCommand(command)
   mq.cmdf("/say %s", command)
 end
@@ -395,7 +394,6 @@ end
 ---@param doSummon boolean
 local function onCloseCorpsePopup(doSummon)
   uiState.corpse.deactivate(uiState)
-  logger.Warn("onCloseCorpsePopup <%s>", doSummon)
   if doSummon then
     doGMCommand("#summon")
   end
@@ -469,8 +467,15 @@ local function actionbarUI()
 
   createStateButton(uiState.godmode)
   imgui.SameLine()
-  createButton(uiState.rq, yellowButton)
+  createButton(uiState.kill, redButton)
   imgui.SameLine()
+  createButton(uiState.cazictouch, redButton)
+  imgui.SameLine()
+  createButton(uiState.kick, orangeButton)
+  imgui.SameLine()
+  createStateButton(uiState.zone)
+
+  -- newline
   createButton(uiState.buffs, blueButton)
   imgui.SameLine()
   createButton(uiState.petWeapons, blueButton)
@@ -482,14 +487,9 @@ local function actionbarUI()
   createButton(uiState.ressurect, fuchsiaButton)
   imgui.SameLine()
   createButton(uiState.illusion, fuchsiaButton)
-  imgui.SameLine()
-  createButton(uiState.kill, redButton)
-  imgui.SameLine()
-  createButton(uiState.cazictouch, redButton)
-  imgui.SameLine()
-  createButton(uiState.kick, orangeButton)
-  imgui.SameLine()
-  createStateButton(uiState.zone)
+
+  -- newline
+  createButton(uiState.rq, yellowButton)
   imgui.SameLine()
   createButton(uiState.reloadrules, fuchsiaButton)
   imgui.SameLine()
