@@ -2,6 +2,7 @@ local mq = require 'mq'
 local imgui = require 'ImGui'
 local uihelpers = require('uihelpers')
 
+local EscapeKeyId = 27 -- https://github.com/gallexme/LuaPlugin-GTAV/blob/master/scripts/keys.lua
 local selectedCorpse = nil
 
 local function resetState()
@@ -48,7 +49,7 @@ local function renderZoneSelector(corpses, okText, summonTarget)
     imgui.EndDisabled()
     imgui.SameLine()
 
-    if imgui.Button("Cancel") then
+    if imgui.Button("Cancel") or ImGui.IsKeyPressed(EscapeKeyId) then
       resetState()
       imgui.CloseCurrentPopup()
       summonTarget();
