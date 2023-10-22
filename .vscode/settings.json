@@ -4,7 +4,6 @@
         "definitions/": true,
         "broadcast/": true,
         "utils/": true,
-        "wait4rez/": true,
     },
     "workbench.colorCustomizations": {
         "editorBracketHighlight.foreground1": "#5caeef",
@@ -21,10 +20,7 @@
     "Lua.runtime.version": "Lua 5.1",
     "Lua.workspace.library": [
         "./definitions/mq",
-        "./definitions/imgui",
-        "./definitions/imgui-icons",
         "./broadcast",
         "./utils",
-        "./wait4rez",
     ],
 }
