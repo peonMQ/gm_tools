@@ -7,10 +7,6 @@ local plugins = require('utils/plugins')
 local broadCastInterfaceFactory = require('broadcast/broadcastinterface')
 
 local bci = broadCastInterfaceFactory()
-if not bci then
-  logger.Fatal("No networking interface found, please start eqbc or dannet")
-  return
-end
 
 local zoneselector = require('zoneselector')
 local corpseselector = require('corpseselector')
@@ -463,7 +459,7 @@ local function createButton(state, buttonColor)
 end
 
 local function actionbarUI()
-  openGUI = imgui.Begin('Actions', openGUI, windowFlags)
+  openGUI = imgui.Begin('GMActions', openGUI, windowFlags)
 
   createStateButton(uiState.godmode)
   imgui.SameLine()
@@ -527,5 +523,7 @@ mq.imgui.init('ActionBar', actionbarUI)
 
 while not terminate do
   mq.delay(500)
-  playerCorpses = mq.getFilteredSpawns(function(spawn) return spawn.Type() == "Corpse" and spawn.Deity.ID() > 0 end)
+  if not uiState.corpse.active then
+    playerCorpses = mq.getFilteredSpawns(function(spawn) return spawn.Type() == "Corpse" and spawn.Deity.ID() > 0 end)
+  end
 end
