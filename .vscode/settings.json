@@ -2,8 +2,7 @@
     "editor.bracketPairColorization.enabled": true,
     "files.exclude": {
         "definitions/": true,
-        "broadcast/": true,
-        "utils/": true,
+        "knightlinc/": true,
     },
     "workbench.colorCustomizations": {
         "editorBracketHighlight.foreground1": "#5caeef",
@@ -21,7 +20,6 @@
     "Lua.workspace.library": [
         "./definitions/mq",
         "./definitions/imgui",
-        "./broadcast",
-        "./utils",
+        "./knightlinc",
     ],
 }

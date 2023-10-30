@@ -1,18 +1,14 @@
 local imgui = require 'ImGui'
 local mq = require 'mq'
 local icons = require 'mq/icons'
-local logger = require 'utils/logging'
-local debugUtils = require 'utils/debug'
-local plugins = require('utils/plugins')
-local broadCastInterfaceFactory = require('broadcast/broadcastinterface')
-
-local bci = broadCastInterfaceFactory()
-
+local logger = require 'knightlinc/Write'
 local zoneselector = require('zoneselector')
 local corpseselector = require('corpseselector')
 local zoneinstanceselector = require('zoneinstanceselector')
 local illusionselector = require('illusionselector')
 
+logger.prefix = string.format("\at%s\ax", "[GM]")
+logger.postfix = function () return string.format(" %s", os.date("%X")) end
 
 -- local classes
 ---@class ActionButton
