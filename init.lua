@@ -1,512 +1,114 @@
 local imgui = require 'ImGui'
 local mq = require 'mq'
-local icons = require 'mq/icons'
-local logger = require 'knightlinc/Write'
+local logger = require 'knightlinc.Write'
+local buttons = require 'ui.buttons'
 local zoneselector = require('zoneselector')
 local corpseselector = require('corpseselector')
 local zoneinstanceselector = require('zoneinstanceselector')
 local illusionselector = require('illusionselector')
+local npc_editor_window = require('ui.npc_editor')
+local state = require 'state'
+local command_queue = require'application.command_queue'
+local cast_spell_command = require'application.commands.cast_spell_command'
+local summon_command = require'application.commands.summon_command'
+local zone_command = require'application.commands.zone_command'
+local zone_instance_command = require'application.commands.zone_instance_command'
+local zoneshutdown_command = require'application.commands.zoneshutdown_command'
 
 logger.prefix = string.format("\at%s\ax", "[GM]")
 logger.postfix = function () return string.format(" %s", os.date("%X")) end
 
--- local classes
----@class ActionButton
----@field public active boolean
----@field public icon string
----@field public activeIcon? string
----@field public tooltip string
----@field public isDisabled fun(state:ActionButtons):boolean
----@field public activate fun(state:ActionButtons)
----@field public deactivate? fun(state:ActionButtons)
-
-
----@class ActionButtons
----@field public buffs ActionButton
----@field public petWeapons ActionButton
----@field public cazictouch ActionButton
----@field public corpse ActionButton
----@field public godmode ActionButton
----@field public heal ActionButton
----@field public kick ActionButton
----@field public kill ActionButton
----@field public ressurect ActionButton
----@field public rq ActionButton
----@field public summon ActionButton
----@field public illusion ActionButton
----@field public zone ActionButton
----@field public zoneinstance ActionButton
----@field public zoneshutdown ActionButton
-
 -- GUI Control variables
 local openGUI = true
 local terminate = false
-local buttonSize = ImVec2(30, 30)
 local windowFlags = bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoDocking, ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoFocusOnAppearing, ImGuiWindowFlags.NoNav)
 
-local playerCorpses = {}
-
-local function create(h, s, v)
-  local r, g, b = imgui.ColorConvertHSVtoRGB(h / 7.0, s, v)
-  return ImVec4(r, g, b, 1)
-end
-
-local blueButton = {
-  default = create(4, 0.6, 0.6),
-  hovered = create(4, 0.7, 0.7),
-  active = create(4, 0.8, 0.8),
-}
-
-local darkBlueButton = {
-  default = create(4.8, 0.6, 0.6),
-  hovered = create(4.8, 0.7, 0.7),
-  active = create(4.8, 0.8, 0.8),
-}
-
-local greenButton = {
-  default = create(2, 0.6, 0.6),
-  hovered = create(2, 0.7, 0.7),
-  active = create(2, 0.8, 0.8),
-}
-
-local redButton = {
-  default = create(0, 0.6, 0.6),
-  hovered = create(0, 0.7, 0.7),
-  active = create(0, 0.8, 0.8),
-}
-
-local orangeButton = {
-  default = create(0.55, 0.6, 0.6),
-  hovered = create(0.55, 0.7, 0.7),
-  active = create(0.55, 0.8, 0.8),
-}
-
-local yellowButton = {
-  default = create(1, 0.6, 0.6),
-  hovered = create(1, 0.7, 0.7),
-  active = create(1, 0.8, 0.8),
-}
-
-local fuchsiaButton = {
-  default = create(6.4, 0.6, 0.6),
-  hovered = create(6.4, 0.7, 0.7),
-  active = create(6.4, 0.8, 0.8),
-}
-
-local function doGMCommand(command)
-  mq.cmdf("/say %s", command)
-end
-
----@type ActionButton
-local buffs = {
-  active = false,
-  icon = icons.FA_MAGIC, -- MD_ANDRIOD
-  tooltip = "Buff target",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() or mq.TLO.Target.ID() == mq.TLO.Me.ID() or mq.TLO.Target.GM() end,
-  activate = function(state)
-    -- doGMCommand("#castspell 2680") -- overwritten by Beta Brell's Stalwart : 3028
-    doGMCommand("#castspell 2681")
-    doGMCommand("#castspell 2682")
-    -- doGMCommand("#castspell 2691") -- overwritten by Beta Boar : 3023
-    doGMCommand("#castspell 2692")
-    doGMCommand("#castspell 2693")
-    doGMCommand("#castspell 2695")
-    doGMCommand("#castspell 2696")
-    doGMCommand("#castspell 2699")
-    doGMCommand("#castspell 3023")
-    doGMCommand("#castspell 3028")
-  end
-}
-
----@type ActionButton
-local petWeapons = {
-  active = false,
-  icon = icons.FA_SHIELD,
-  tooltip = "Pet Weapons",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() or mq.TLO.Target.ID() == mq.TLO.Me.ID() or mq.TLO.Target.GM() end,
-  activate = function(state)
-    doGMCommand("#giveitem 28595")
-    doGMCommand("#giveitem 28595")
-    doGMCommand("#giveitem 28595")
-    doGMCommand("#giveitem 28595")
-  end
-}
-
----@type ActionButton
-local cazictouch = {
-  active = false,
-  icon = icons.FA_MAGIC, -- MD_ANDRIOD
-  tooltip = "Cazic Touch target",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() or mq.TLO.Target.ID() == mq.TLO.Me.ID() or mq.TLO.Target.GM() end,
-  activate = function(state)
-    doGMCommand("#castspell 7477")
-  end
-}
-
----@type ActionButton
-local corpse = {
-  active = false,
-  icon = icons.MD_AIRLINE_SEAT_FLAT, -- MD_ANDRIOD
-  tooltip = "Corpse",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not next(playerCorpses) end,
-  activate = function(state)
-    state.corpse.active = true
-  end,
-  deactivate = function(state)
-    state.corpse.active = false
-  end,
-}
-
----@type ActionButton
-local godmode = {
-  active = false,
-  icon = icons.MD_ANDROID,
-  tooltip = "God mode",
-  isDisabled = function (state)
-    return not mq.TLO.Me.GM()
-  end,
-  activate = function(state)
-    state.godmode.active = true
-    doGMCommand("#godmode on")
-  end,
-  deactivate = function(state)
-    state.godmode.active = false
-    doGMCommand("#godmode off")
-  end,
-}
----@type ActionButton
-local heal = {
-  active = false,
-  icon = icons.MD_HEALING, -- MD_ANDRIOD
-  tooltip = "Heal target",
-  isDisabled = function (state)
-    local target = mq.TLO.Target
-    return not mq.TLO.Me.GM() or not target() or target.Type() == "Corpse"
-  end,
-  activate = function(state)
-    doGMCommand("#heal")
-    doGMCommand("#mana")
-  end
-}
-
----@type ActionButton
-local kick = {
-  active = false,
-  icon = icons.FA_MINUS_SQUARE, -- MD_ANDRIOD
-  tooltip = "Kick target",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() or mq.TLO.Target.ID() == mq.TLO.Me.ID() or mq.TLO.Target.GM() end,
-  activate = function(state)
-    doGMCommand("#kick")
-  end
-}
-
----@type ActionButton
-local kill = {
-  active = false,
-  icon = icons.FA_MINUS_CIRCLE, -- MD_ANDRIOD
-  tooltip = "Kill target",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() or mq.TLO.Target.ID() == mq.TLO.Me.ID() or mq.TLO.Target.GM() end,
-  activate = function(state)
-    doGMCommand("#kill")
-  end
-}
-
----@type ActionButton
-local reloadrules = {
-  active = false,
-  icon = icons.MD_REFRESH,
-  tooltip = "Reload Rules",
-  isDisabled = function (state)
-    return not mq.TLO.Me.GM()
-  end,
-  activate = function(state)
-    doGMCommand("#reloadrules")
-  end
-}
-
----@type ActionButton
-local repop = {
-  active = false,
-  icon = icons.MD_REFRESH,
-  tooltip = "Repop Zone",
-  isDisabled = function (state)
-    return not mq.TLO.Me.GM()
-  end,
-  activate = function(state)
-    doGMCommand("#repop")
-  end
-}
-
----@type ActionButton
-local ressurect = {
-  active = false,
-  icon = icons.MD_HEALING, -- MD_ANDRIOD
-  tooltip = "Ressurect target",
-  isDisabled = function (state)
-    local target = mq.TLO.Target
-    return not mq.TLO.Me.GM() or not target() or target.Type() ~= "Corpse"
-  end,
-  activate = function(state)
-    doGMCommand("#castspell 994")
-  end
-}
-
----@type ActionButton
-local rq = {
-  active = false,
-  icon = icons.MD_REFRESH, -- MD_ANDRIOD
-  tooltip = "Reload quests",
-  isDisabled = function (state) return not mq.TLO.Me.GM() end,
-  activate = function(state)
-    doGMCommand("#rq")
-  end
-}
-
----@type ActionButton
-local summon = {
-  active = false,
-  icon = icons.MD_PLAY_ARROW, -- MD_ANDRIOD
-  tooltip = "Summon target",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() end,
-  activate = function(state)
-    doGMCommand("#summon")
-  end
-}
-
----@type ActionButton
-local togglezone = {
-  active = false,
-  icon = icons.FA_PAPER_PLANE,
-  tooltip = "Zone",
-  isDisabled = function (state) return not mq.TLO.Me.GM() end,
-  activate = function(state)
-    state.zone.active = true
-  end,
-  deactivate = function(state)
-    state.zone.active = false
-  end,
-}
-
----@type ActionButton
-local illusion = {
-  active = false,
-  icon = icons.FA_MAGIC,
-  tooltip = "Illusion",
-  isDisabled = function (state) return not mq.TLO.Me.GM() or not mq.TLO.Target() end,
-  activate = function(state)
-    state.illusion.active = true
-  end,
-  deactivate = function(state)
-    state.illusion.active = false
-  end,
-}
-
----@type ActionButton
-local zoneinstance = {
-  active = false,
-  icon = icons.FA_PAPER_PLANE,
-  tooltip = "Zone Instance",
-  isDisabled = function (state) return not mq.TLO.Me.GM() end,
-  activate = function(state)
-    state.zoneinstance.active = true
-  end,
-  deactivate = function(state)
-    state.zoneinstance.active = false
-  end,
-}
-
----@type ActionButton
-local zoneshutdown = {
-  active = false,
-  icon = icons.FA_POWER_OFF,
-  tooltip = "Shutdown zone",
-  isDisabled = function (state) return not mq.TLO.Me.GM() end,
-  activate = function(state)
-    state.zoneshutdown.active = true
-  end,
-  deactivate = function(state)
-    state.zoneshutdown.active = false
-  end,
-}
-
----@type ActionButtons
-local uiState = {
-  buffs = buffs,
-  petWeapons = petWeapons,
-  cazictouch = cazictouch,
-  corpse = corpse,
-  godmode = godmode,
-  heal = heal,
-  kick = kick,
-  kill = kill,
-  reloadrules = reloadrules,
-  repop = repop,
-  ressurect = ressurect,
-  rq = rq,
-  summon = summon,
-  illusion = illusion,
-  zone = togglezone,
-  zoneinstance = zoneinstance,
-  zoneshutdown = zoneshutdown,
-}
-
 local function zoneTo(zoneShortName)
-  uiState.zone.deactivate(uiState)
+  state.ui_State.zone.deactivate(state.ui_State)
   if not zoneShortName then
     return
   elseif not mq.TLO.Zone(zoneShortName).ID() then
     logger.Error("Zone shortname does not exist <%s>", zoneShortName)
   else
-    doGMCommand(string.format("#zone %s", zoneShortName))
+    zone_command.Queue(zoneShortName)
   end
 end
 
 local function massIllusion(spellId)
-  uiState.illusion.deactivate(uiState)
-  if not spellId then
-    return
-  else
-    doGMCommand(string.format("#castspell %s", spellId))
-  end
+  state.ui_State.illusion.deactivate(state.ui_State)
+  cast_spell_command.Queue(spellId)
 end
 
 local function zoneShutdown(zoneShortName)
-  uiState.zoneshutdown.deactivate(uiState)
-  if not zoneShortName then
-    return
-  elseif not mq.TLO.Zone(zoneShortName).ID() then
-    logger.Error("Zone shortname does not exist <%s>", zoneShortName)
-  elseif zoneShortName == mq.TLO.Zone.ShortName() then
-    logger.Error("Teleport to a different zone before trying to shutdown <%s>", zoneShortName)
-  else
-    doGMCommand(string.format("#zoneshutdown %s", zoneShortName))
-  end
+  state.ui_State.zoneshutdown.deactivate(state.ui_State)
+  zoneshutdown_command.Queue(zoneShortName)
 end
 
----@param doSummon boolean
-local function onCloseCorpsePopup(doSummon)
-  uiState.corpse.deactivate(uiState)
-  if doSummon then
-    doGMCommand("#summon")
-  end
+local function zoneInstance(selectedInstanceId)
+  state.ui_State.zoneinstance.deactivate(state.ui_State)
+  zone_instance_command.Queue(selectedInstanceId)
 end
 
-local function DrawTooltip(text)
-  if imgui.IsItemHovered() and text and string.len(text) > 0 then
-      imgui.BeginTooltip()
-      imgui.PushTextWrapPos(imgui.GetFontSize() * 35.0)
-      imgui.Text(text)
-      imgui.PopTextWrapPos()
-      imgui.EndTooltip()
-  end
-end
-
-local function createStateButton(state)
-  if not state.active then
-    imgui.PushStyleColor(ImGuiCol.Button, blueButton.default)
-    imgui.PushStyleColor(ImGuiCol.ButtonHovered, greenButton.hovered)
-    imgui.PushStyleColor(ImGuiCol.ButtonActive, greenButton.active)
-    local isDisabled = state.isDisabled(uiState)
-    imgui.BeginDisabled(isDisabled)
-    imgui.Button(state.icon, buttonSize)
-    imgui.EndDisabled()
-  else
-    imgui.PushStyleColor(ImGuiCol.Button, greenButton.default)
-    imgui.PushStyleColor(ImGuiCol.ButtonHovered, redButton.hovered)
-    imgui.PushStyleColor(ImGuiCol.ButtonActive, redButton.hovered)
-    local isDisabled = state.isDisabled(uiState)
-    imgui.BeginDisabled(isDisabled)
-    if not state.activeIcon then
-      imgui.Button(state.icon, buttonSize)
-    else
-      imgui.Button(state.activeIcon, buttonSize)
-    end
-    imgui.EndDisabled()
-  end
-
-  DrawTooltip(state.tooltip)
-
-  if imgui.IsItemClicked(0) then
-    if not state.active then
-      state.activate(uiState)
-    else
-      state.deactivate(uiState)
-    end
-  end
-
-  imgui.PopStyleColor(3)
-end
-
-local function createButton(state, buttonColor)
-  imgui.PushStyleColor(ImGuiCol.Button, buttonColor.default)
-  imgui.PushStyleColor(ImGuiCol.ButtonHovered, buttonColor.hovered)
-  imgui.PushStyleColor(ImGuiCol.ButtonActive, buttonColor.active)
-
-  local isDisabled = state.isDisabled(uiState)
-  imgui.BeginDisabled(isDisabled)
-  imgui.Button(state.icon, buttonSize)
-  imgui.EndDisabled()
-  DrawTooltip(state.tooltip)
-  if not isDisabled and imgui.IsItemClicked(0) then
-    state.activate(uiState)
-  end
-
-  imgui.PopStyleColor(3)
+local function onCloseCorpsePopup()
+  state.ui_State.corpse.deactivate(state.ui_State)
 end
 
 local function actionbarUI()
   openGUI = imgui.Begin('GMActions', openGUI, windowFlags)
 
-  createStateButton(uiState.godmode)
+  buttons.CreateStateButton(state.ui_State.godmode, state.ui_State)
   imgui.SameLine()
-  createButton(uiState.kill, redButton)
+  buttons.CreateButton(state.ui_State.kill, buttons.Colors.redButton, state.ui_State)
   imgui.SameLine()
-  createButton(uiState.cazictouch, redButton)
+  buttons.CreateButton(state.ui_State.cazictouch, buttons.Colors.redButton, state.ui_State)
   imgui.SameLine()
-  createButton(uiState.kick, orangeButton)
+  buttons.CreateButton(state.ui_State.kick, buttons.Colors.orangeButton, state.ui_State)
   imgui.SameLine()
-  createStateButton(uiState.zone)
+  buttons.CreateStateButton(state.ui_State.zone, state.ui_State)
 
   -- newline
-  createButton(uiState.buffs, blueButton)
+  buttons.CreateButton(state.ui_State.buffs, buttons.Colors.blueButton, state.ui_State)
   imgui.SameLine()
-  createButton(uiState.petWeapons, blueButton)
+  buttons.CreateButton(state.ui_State.petWeapons, buttons.Colors.blueButton, state.ui_State)
   imgui.SameLine()
-  createButton(uiState.corpse, blueButton)
+  buttons.CreateButton(state.ui_State.corpse, buttons.Colors.blueButton, state.ui_State)
   imgui.SameLine()
-  createButton(uiState.heal, greenButton)
+  buttons.CreateButton(state.ui_State.heal, buttons.Colors.greenButton, state.ui_State)
   imgui.SameLine()
-  createButton(uiState.ressurect, fuchsiaButton)
+  buttons.CreateButton(state.ui_State.ressurect, buttons.Colors.fuchsiaButton, state.ui_State)
   imgui.SameLine()
-  createButton(uiState.illusion, fuchsiaButton)
+  buttons.CreateButton(state.ui_State.illusion, buttons.Colors.fuchsiaButton, state.ui_State)
 
   -- newline
-  createButton(uiState.rq, yellowButton)
+  buttons.CreateButton(state.ui_State.rq, buttons.Colors.yellowButton, state.ui_State)
   imgui.SameLine()
-  createButton(uiState.reloadrules, fuchsiaButton)
+  buttons.CreateButton(state.ui_State.reloadrules, buttons.Colors.fuchsiaButton, state.ui_State)
   imgui.SameLine()
-  createButton(uiState.repop, orangeButton)
+  buttons.CreateButton(state.ui_State.repop, buttons.Colors.orangeButton, state.ui_State)
   imgui.SameLine()
-  createStateButton(uiState.zoneshutdown)
+  buttons.CreateStateButton(state.ui_State.zoneshutdown, state.ui_State)
+
+  --newline
+  -- buttons.CreateStateButton(state.ui_State.npceditor, state.ui_State)
 
   imgui.End()
-  if uiState.zone.active then
+  if state.ui_State.zone.active then
     zoneselector("Zone", zoneTo)
   end
 
-  if uiState.zoneshutdown.active then
+  if state.ui_State.zoneshutdown.active then
     zoneselector("Zone Shutdown", zoneShutdown)
   end
 
-  if uiState.zoneinstance.active then
-    zoneinstanceselector("Zone to Instance", function(selectedInstanceId) uiState.zoneinstance.deactivate(uiState); doGMCommand("#zoneinstance "..selectedInstanceId) end)
+  if state.ui_State.zoneinstance.active then
+    zoneinstanceselector("Zone to Instance", zoneInstance)
   end
 
-  if uiState.corpse.active then
-    corpseselector(playerCorpses, "Summon Corpse", onCloseCorpsePopup)
+  if state.ui_State.corpse.active then
+    corpseselector(state.GetplayerCorpses(), onCloseCorpsePopup)
   end
 
-  if uiState.illusion.active then
+  if state.ui_State.illusion.active then
     illusionselector("Mass Illusion", massIllusion)
   end
 
@@ -515,11 +117,16 @@ local function actionbarUI()
   end
 end
 
+npc_editor_window.Init()
 mq.imgui.init('ActionBar', actionbarUI)
 
 while not terminate do
-  mq.delay(500)
-  if not uiState.corpse.active then
-    playerCorpses = mq.getFilteredSpawns(function(spawn) return spawn.Type() == "Corpse" and spawn.Deity.ID() > 0 end)
+  mq.delay(100)
+  if not state.ui_State.corpse.active then
+    state.setPlayerCorpses(mq.getFilteredSpawns(function(spawn) return spawn.Type() == "Corpse" and spawn.Deity.ID() > 0 end))
   end
+
+  state.ui_State.npceditor.active = npc_editor_window.IsOpen()
+
+  command_queue.Process()
 end

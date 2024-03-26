@@ -1,7 +1,7 @@
 local imgui = require 'ImGui'
 
 local uihelpers = require('uihelpers')
-local worldZones = require('zones')
+local worldZones = require('data/zones')
 
 local EscapeKeyId = 27 -- https://github.com/gallexme/LuaPlugin-GTAV/blob/master/scripts/keys.lua
 
