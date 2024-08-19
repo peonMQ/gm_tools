@@ -1,6 +1,6 @@
 local imgui = require 'ImGui'
 local mq = require 'mq'
-local icons = require 'mq.icons'
+local icons = require 'mq.Icons'
 local logger = require 'knightlinc.Write'
 local buff_command = require'application.commands.buff_command'
 local cast_spell_command = require'application.commands.cast_spell_command'
