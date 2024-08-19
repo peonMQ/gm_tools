@@ -1,10 +1,11 @@
 local mq = require 'mq'
 local imgui = require 'ImGui'
-local uihelpers = require('uihelpers')
+local uihelpers = require 'uihelpers'
 local mass_summon_ressurect_command = require'application.commands.mass_summon_ressurect_command'
 local summon_command = require'application.commands.summon_command'
 local cast_spell_command = require'application.commands.cast_spell_command'
 
+local GM_REZZ_SPELL_ID = 994
 local EscapeKeyId = 27 -- https://github.com/gallexme/LuaPlugin-GTAV/blob/master/scripts/keys.lua
 
 ---@type PlayerCorpe|nil
@@ -40,7 +41,7 @@ local function render(corpses, onClose)
     local isDisabled = not selectedCorpse or not target() or target.ID() ~= selectedCorpse.Id
     imgui.BeginDisabled(isDisabled)
     if imgui.Button("Ressurect") then
-      cast_spell_command.Queue(994)
+      cast_spell_command.Queue(GM_REZZ_SPELL_ID)
     end
     imgui.EndDisabled()
     imgui.SameLine()
