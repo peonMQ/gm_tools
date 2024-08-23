@@ -20,6 +20,7 @@ logger.postfix = function () return string.format(" %s", os.date("%X")) end
 
 -- GUI Control variables
 local openGUI = true
+local shouldDrawGUI = true
 local terminate = false
 local windowFlags = bit32.bor(ImGuiWindowFlags.NoDecoration, ImGuiWindowFlags.NoDocking, ImGuiWindowFlags.AlwaysAutoResize, ImGuiWindowFlags.NoFocusOnAppearing, ImGuiWindowFlags.NoNav)
 
@@ -54,62 +55,65 @@ local function onCloseCorpsePopup()
 end
 
 local function actionbarUI()
-  openGUI = imgui.Begin('GMActions', openGUI, windowFlags)
+  if not openGUI then return end
+  openGUI, shouldDrawGUI = imgui.Begin('GMActions', openGUI, windowFlags)
 
-  buttons.CreateStateButton(state.ui_State.godmode, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateButton(state.ui_State.kill, buttons.Colors.redButton, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateButton(state.ui_State.cazictouch, buttons.Colors.redButton, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateButton(state.ui_State.kick, buttons.Colors.orangeButton, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateStateButton(state.ui_State.zone, state.ui_State)
+  if shouldDrawGUI then
+    buttons.CreateStateButton(state.ui_State.godmode, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateButton(state.ui_State.kill, buttons.Colors.redButton, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateButton(state.ui_State.cazictouch, buttons.Colors.redButton, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateButton(state.ui_State.kick, buttons.Colors.orangeButton, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateStateButton(state.ui_State.zone, state.ui_State)
 
-  -- newline
-  buttons.CreateButton(state.ui_State.buffs, buttons.Colors.blueButton, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateButton(state.ui_State.petWeapons, buttons.Colors.blueButton, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateButton(state.ui_State.corpse, buttons.Colors.blueButton, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateButton(state.ui_State.heal, buttons.Colors.greenButton, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateButton(state.ui_State.ressurect, buttons.Colors.fuchsiaButton, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateButton(state.ui_State.illusion, buttons.Colors.fuchsiaButton, state.ui_State)
+    -- newline
+    buttons.CreateButton(state.ui_State.buffs, buttons.Colors.blueButton, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateButton(state.ui_State.petWeapons, buttons.Colors.blueButton, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateButton(state.ui_State.corpse, buttons.Colors.blueButton, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateButton(state.ui_State.heal, buttons.Colors.greenButton, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateButton(state.ui_State.ressurect, buttons.Colors.fuchsiaButton, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateButton(state.ui_State.illusion, buttons.Colors.fuchsiaButton, state.ui_State)
 
-  -- newline
-  buttons.CreateButton(state.ui_State.rq, buttons.Colors.yellowButton, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateButton(state.ui_State.reloadrules, buttons.Colors.fuchsiaButton, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateButton(state.ui_State.repop, buttons.Colors.orangeButton, state.ui_State)
-  imgui.SameLine()
-  buttons.CreateStateButton(state.ui_State.zoneshutdown, state.ui_State)
+    -- newline
+    buttons.CreateButton(state.ui_State.rq, buttons.Colors.yellowButton, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateButton(state.ui_State.reloadrules, buttons.Colors.fuchsiaButton, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateButton(state.ui_State.repop, buttons.Colors.orangeButton, state.ui_State)
+    imgui.SameLine()
+    buttons.CreateStateButton(state.ui_State.zoneshutdown, state.ui_State)
 
-  --newline
-  -- buttons.CreateStateButton(state.ui_State.npceditor, state.ui_State)
+    --newline
+    -- buttons.CreateStateButton(state.ui_State.npceditor, state.ui_State)
 
-  imgui.End()
-  if state.ui_State.zone.active then
-    zoneselector("Zone", zoneTo)
-  end
+    imgui.End()
+    if state.ui_State.zone.active then
+      zoneselector("Zone", zoneTo)
+    end
 
-  if state.ui_State.zoneshutdown.active then
-    zoneselector("Zone Shutdown", zoneShutdown)
-  end
+    if state.ui_State.zoneshutdown.active then
+      zoneselector("Zone Shutdown", zoneShutdown)
+    end
 
-  if state.ui_State.zoneinstance.active then
-    zoneinstanceselector("Zone to Instance", zoneInstance)
-  end
+    if state.ui_State.zoneinstance.active then
+      zoneinstanceselector("Zone to Instance", zoneInstance)
+    end
 
-  if state.ui_State.corpse.active then
-    corpseselector(state.GetplayerCorpses(), onCloseCorpsePopup)
-  end
+    if state.ui_State.corpse.active then
+      corpseselector(state.GetplayerCorpses(), onCloseCorpsePopup)
+    end
 
-  if state.ui_State.illusion.active then
-    illusionselector("Mass Illusion", massIllusion)
+    if state.ui_State.illusion.active then
+      illusionselector("Mass Illusion", massIllusion)
+    end
   end
 
   if not openGUI then
@@ -122,6 +126,8 @@ mq.imgui.init('ActionBar', actionbarUI)
 
 while not terminate do
   mq.delay(100)
+  local inGame = mq.TLO.EverQuest.GameState()
+  openGUI = inGame == 'INGAME'
   if not state.ui_State.corpse.active then
     state.setPlayerCorpses(mq.getFilteredSpawns(function(spawn) return spawn.Type() == "Corpse" and spawn.Deity.ID() > 0 end))
   end
