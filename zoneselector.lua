@@ -62,11 +62,20 @@ local function renderZoneSelector(okText, selectedZoneAction)
 
   if imgui.BeginPopupModal("Select Zone", nil, ImGuiWindowFlags.AlwaysAutoResize) then
     imgui.Text("Select a continent and zone to go to:")
-
-    selectedContinent = uihelpers.DrawComboBox3("Continent", selectedContinent, continents, convertContient)
+    
+    imgui.BeginGroup()
+    imgui.Text("Continent")
     if selectedContinent and selectedContinent.zones then
-      selectedZone = uihelpers.DrawComboBox3("Zone", selectedZone, selectedContinent.zones, convertZone)
+      imgui.Text("Zone")
     end
+    imgui.EndGroup()
+    imgui.SameLine()
+    imgui.BeginGroup()
+    selectedContinent = uihelpers.Render("Continent", selectedContinent, continents, convertContient)
+    if selectedContinent and selectedContinent.zones then
+      selectedZone = uihelpers.Render("Zone", selectedZone, selectedContinent.zones, convertZone)
+    end
+    imgui.EndGroup()
 
     imgui.BeginDisabled(not selectedZone)
     if imgui.Button(okText) and selectedZone then

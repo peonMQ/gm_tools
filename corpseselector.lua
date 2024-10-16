@@ -24,7 +24,7 @@ local function render(corpses, onClose)
 
   if imgui.BeginPopupModal("Summon Corpse", nil, ImGuiWindowFlags.AlwaysAutoResize) then
     imgui.Text("Select a corpse to summon:")
-    selectedCorpse = uihelpers.DrawComboBox3("Corpse", selectedCorpse, corpses, function(spawn) if spawn then return spawn.Name else return "" end end)
+    selectedCorpse = uihelpers.RenderWithLabel("Corpse", selectedCorpse, corpses, function(spawn) if spawn then return spawn.Name else return "" end end)
 
     local target = mq.TLO.Target
     if selectedCorpse and (not target() or target.ID() ~= selectedCorpse.Id) then

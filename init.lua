@@ -54,9 +54,11 @@ local function onCloseCorpsePopup()
   state.ui_State.corpse.deactivate(state.ui_State)
 end
 
+local eq_path = mq.TLO.EverQuest.Path()
+eq_path = eq_path:gsub('.*%/', '') -- https://stackoverflow.com/questions/74408159/lua-help-to-get-an-end-of-string-after-last-special-character
 local function actionbarUI()
   if not openGUI then return end
-  openGUI, shouldDrawGUI = imgui.Begin('GMActions', openGUI, windowFlags)
+  openGUI, shouldDrawGUI = imgui.Begin(('GMActions###gm_%s'):format(eq_path), openGUI, windowFlags)
 
   if shouldDrawGUI then
     buttons.CreateStateButton(state.ui_State.godmode, state.ui_State)
@@ -122,7 +124,7 @@ local function actionbarUI()
 end
 
 npc_editor_window.Init()
-mq.imgui.init('ActionBar', actionbarUI)
+mq.imgui.init('GMBar', actionbarUI)
 
 while not terminate do
   mq.delay(100)

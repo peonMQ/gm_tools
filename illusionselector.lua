@@ -75,7 +75,7 @@ local function renderZoneSelector(okText, selectedIllusionSpellAction)
   if imgui.BeginPopupModal("Select Illusion", nil, ImGuiWindowFlags.AlwaysAutoResize) then
     imgui.Text("Select a continent and zone to go to:")
 
-    selectedIllusionSpell = uihelpers.DrawComboBox3("IllusionSpell", selectedIllusionSpell, illusionSpells, convertIllusionSpell)
+    selectedIllusionSpell = uihelpers.RenderWithLabel("IllusionSpell", selectedIllusionSpell, illusionSpells, convertIllusionSpell)
 
     imgui.BeginDisabled(not selectedIllusionSpell)
     if imgui.Button(okText) and selectedIllusionSpell then
