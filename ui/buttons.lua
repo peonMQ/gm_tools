@@ -102,7 +102,9 @@ local function createButton(state, buttonColor, uiState)
 
   local isDisabled = state.isDisabled(uiState)
   imgui.BeginDisabled(isDisabled)
+  imgui.PushID(state.tooltip)
   imgui.Button(state.icon, buttonSize)
+  imgui.PopID()
   imgui.EndDisabled()
   drawTooltip(state.tooltip)
   if not isDisabled and imgui.IsItemClicked(0) then
