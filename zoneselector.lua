@@ -3,8 +3,6 @@ local imgui = require 'ImGui'
 local uihelpers = require('uihelpers')
 local worldZones = require('data/zones')
 
-local EscapeKeyId = 27 -- https://github.com/gallexme/LuaPlugin-GTAV/blob/master/scripts/keys.lua
-
 ---@type Continent[]
 local continents = {}
 for continent,continentZones in pairs(worldZones) do
@@ -88,7 +86,7 @@ local function renderZoneSelector(okText, selectedZoneAction)
 
     imgui.SameLine()
 
-    if imgui.Button("Cancel") or ImGui.IsKeyPressed(EscapeKeyId) then
+    if imgui.Button("Cancel") or ImGui.IsKeyPressed(ImGuiKey.Escape) then
       resetState()
       imgui.CloseCurrentPopup()
       selectedZoneAction();
