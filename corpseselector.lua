@@ -6,7 +6,6 @@ local summon_command = require'application.commands.summon_command'
 local cast_spell_command = require'application.commands.cast_spell_command'
 
 local GM_REZZ_SPELL_ID = 994
-local EscapeKeyId = 27 -- https://github.com/gallexme/LuaPlugin-GTAV/blob/master/scripts/keys.lua
 
 ---@type PlayerCorpe|nil
 local selectedCorpse = nil
@@ -51,7 +50,7 @@ local function render(corpses, onClose)
     end
     imgui.SameLine()
 
-    if imgui.Button("Cancel") or ImGui.IsKeyPressed(EscapeKeyId) then
+    if imgui.Button("Cancel") or ImGui.IsKeyPressed(ImGuiKey.Escape) then
       imgui.CloseCurrentPopup()
       resetState()
       onClose()

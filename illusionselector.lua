@@ -3,7 +3,6 @@ local imgui = require 'ImGui'
 
 local uihelpers = require('uihelpers')
 
-local EscapeKeyId = 27 -- https://github.com/gallexme/LuaPlugin-GTAV/blob/master/scripts/keys.lua
 local illussionSpellIds = {
 6563,
 6564,
@@ -88,7 +87,7 @@ local function renderZoneSelector(okText, selectedIllusionSpellAction)
 
     imgui.SameLine()
 
-    if imgui.Button("Cancel") or ImGui.IsKeyPressed(EscapeKeyId) then
+    if imgui.Button("Cancel") or ImGui.IsKeyPressed(ImGuiKey.Escape) then
       resetState()
       imgui.CloseCurrentPopup()
       selectedIllusionSpellAction();
